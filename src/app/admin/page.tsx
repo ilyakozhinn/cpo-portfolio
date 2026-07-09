@@ -1,0 +1,175 @@
+import { requireCLevel } from "@/lib/auth";
+import {
+  assignProject,
+  createUser,
+  removeProjectAssignment,
+  resetUserPassword,
+  toggleUserActive,
+} from "@/lib/auth-actions";
+import { getAdminData } from "@/lib/queries";
+import { ROLE_LABELS, USER_ROLES } from "@/lib/permissions";
+
+export default async function AdminPage() {
+  await requireCLevel();
+  const { users, projects } = await getAdminData();
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-semibold">Админка доступов</h2>
+        <p className="text-sm text-slate-500">
+          C-level создаёт аккаунты, назначает проекты. PO, PM и маркетологи видят
+          только свои статусы.
+        </p>
+      </div>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h3 className="font-semibold">Создать пользователя</h3>
+        <form action={createUser} className="mt-4 grid gap-3 md:grid-cols-2">
+          <input
+            name="name"
+            placeholder="Имя"
+            required
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="email@company.com"
+            required
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Пароль"
+            required
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <select
+            name="role"
+            required
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          >
+            {USER_ROLES.filter((role) => role !== "c_level").map((role) => (
+              <option key={role} value={role}>
+                {ROLE_LABELS[role]}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800 md:col-span-2 md:w-fit"
+          >
+            Создать аккаунт
+          </button>
+        </form>
+      </section>
+
+      <section className="space-y-4">
+        <h3 className="text-lg font-semibold">Пользователи</h3>
+        {users.map((account) => (
+          <div
+            key={account.id}
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="font-semibold">{account.name}</p>
+                <p className="text-sm text-slate-500">
+                  {account.email} · {ROLE_LABELS[account.role as keyof typeof ROLE_LABELS]}
+                </p>
+                <p className="mt-1 text-xs text-slate-400">
+                  {account.isActive ? "Активен" : "Заблокирован"}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <form action={toggleUserActive}>
+                  <input type="hidden" name="userId" value={account.id} />
+                  <input
+                    type="hidden"
+                    name="isActive"
+                    value={account.isActive ? "false" : "true"}
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50"
+                  >
+                    {account.isActive ? "Заблокировать" : "Разблокировать"}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {account.role !== "c_level" ? (
+              <>
+                <form
+                  action={assignProject}
+                  className="mt-4 flex flex-wrap items-end gap-2"
+                >
+                  <input type="hidden" name="userId" value={account.id} />
+                  <select
+                    name="projectId"
+                    required
+                    className="min-w-[240px] rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  >
+                    <option value="">Назначить проект</option>
+                    {projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name} ({project.businessUnit.name})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
+                  >
+                    Добавить
+                  </button>
+                </form>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {account.assignments.map((assignment) => (
+                    <form key={assignment.id} action={removeProjectAssignment}>
+                      <input
+                        type="hidden"
+                        name="assignmentId"
+                        value={assignment.id}
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs hover:bg-slate-100"
+                      >
+                        {assignment.project.name} ×
+                      </button>
+                    </form>
+                  ))}
+                </div>
+
+                <form
+                  action={resetUserPassword}
+                  className="mt-4 flex flex-wrap items-end gap-2"
+                >
+                  <input type="hidden" name="userId" value={account.id} />
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="Новый пароль"
+                    required
+                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
+                  >
+                    Сбросить пароль
+                  </button>
+                </form>
+              </>
+            ) : null}
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}

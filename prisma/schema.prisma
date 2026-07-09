@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String              @id @default(cuid())
+  email        String              @unique
+  passwordHash String
+  name         String
+  role         String
+  isActive     Boolean             @default(true)
+  assignments  ProjectAssignment[]
+  weeklyStatuses WeeklyStatus[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model ProjectAssignment {
+  id        String  @id @default(cuid())
+  userId    String
+  projectId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+}
+
+model BusinessUnit {
+  id        String    @id @default(cuid())
+  name      String
+  priority  Int
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Person {
+  id            String       @id @default(cuid())
+  name          String       @unique
+  role          String?
+  fte           Float        @default(1.0)
+  skills        String?
+  ownedProjects Project[]    @relation("ProjectOwner")
+  allocations   Allocation[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Project {
+  id              String              @id @default(cuid())
+  name            String
+  domain          String?
+  lifecycle       String              @default("active")
+  priority        Int
+  strategicWeight Int                 @default(3)
+  ragOverride     String?
+  businessUnitId  String
+  ownerId         String?
+  businessUnit    BusinessUnit        @relation(fields: [businessUnitId], references: [id], onDelete: Cascade)
+  owner           Person?             @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  allocations     Allocation[]
+  weeklyStatuses  WeeklyStatus[]
+  decisions       Decision[]
+  assignments     ProjectAssignment[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([businessUnitId])
+  @@index([ownerId])
+  @@index([lifecycle])
+}
+
+model Allocation {
+  id        String   @id @default(cuid())
+  personId  String
+  projectId String
+  weekStart String
+  percent   Int
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([personId, projectId, weekStart])
+  @@index([weekStart])
+}
+
+model WeeklyStatus {
+  id            String   @id @default(cuid())
+  projectId     String
+  weekStart     String
+  department    String
+  rag           String
+  progress      String?
+  tasks         String?
+  risks         String?
+  blockers      String?
+  askToCpo      String?
+  nextMilestone String?
+  authorId      String?
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author        User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectId, weekStart, department])
+  @@index([weekStart])
+  @@index([department])
+}
+
+model Decision {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String
+  comment   String?
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}
