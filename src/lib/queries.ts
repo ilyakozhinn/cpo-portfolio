@@ -281,7 +281,7 @@ export async function resetToCurrentCalendarWeek() {
 }
 
 export async function getAdminData() {
-  const [users, projects] = await Promise.all([
+  const [users, projects, pendingTelegram] = await Promise.all([
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -295,7 +295,10 @@ export async function getAdminData() {
       orderBy: { priority: "asc" },
       include: { businessUnit: true },
     }),
+    prisma.telegramPendingUser.findMany({
+      orderBy: { updatedAt: "desc" },
+    }),
   ]);
 
-  return { users, projects };
+  return { users, projects, pendingTelegram };
 }

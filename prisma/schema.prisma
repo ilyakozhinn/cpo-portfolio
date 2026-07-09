@@ -9,16 +9,51 @@ datasource db {
 }
 
 model User {
-  id            String              @id @default(cuid())
-  email         String              @unique
-  passwordHash  String
-  name          String
-  role          String
-  isActive      Boolean             @default(true)
-  assignments   ProjectAssignment[]
-  weeklyStatuses WeeklyStatus[]
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  id               String              @id @default(cuid())
+  email            String              @unique
+  passwordHash     String
+  name             String
+  role             String
+  isActive         Boolean             @default(true)
+  telegramId       String?             @unique
+  telegramUsername String?
+  assignments      ProjectAssignment[]
+  weeklyStatuses   WeeklyStatus[]
+  telegramSessions TelegramSession[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model TelegramPendingUser {
+  id           String   @id @default(cuid())
+  telegramId   String   @unique
+  username     String?
+  firstName    String?
+  lastName     String?
+  lastMessage  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TelegramSession {
+  id              String   @id @default(cuid())
+  telegramId      String   @unique
+  userId          String?
+  step            String   @default("idle")
+  projectId       String?
+  weekStart       String?
+  draftRag        String?
+  draftProgress   String?
+  draftTasks      String?
+  draftRisks      String?
+  draftBlockers   String?
+  draftAskToCpo   String?
+  draftMilestone  String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model ProjectAssignment {

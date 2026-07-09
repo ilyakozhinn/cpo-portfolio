@@ -18,6 +18,7 @@ export async function middleware(request: NextRequest) {
 
   if (
     PUBLIC_PATHS.includes(pathname) ||
+    pathname.startsWith("/api/telegram/") ||
     pathname.startsWith("/_next") ||
     pathname.includes(".")
   ) {
