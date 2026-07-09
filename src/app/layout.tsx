@@ -41,7 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="ru" className={`${inter.variable} h-full`}>
       <body className="min-h-full font-sans antialiased">
-        <AppShell currentWeek={currentWeek} pathname={pathname} user={user}>
+        <AppShell currentWeek={currentWeek} user={user}>
           {children}
         </AppShell>
       </body>

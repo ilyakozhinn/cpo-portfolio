@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { logout } from "@/lib/auth-actions";
 import { formatWeekLabel } from "@/lib/week";
 import { goToNextWeek, goToPreviousWeek, goToTodayWeek } from "@/lib/week-actions";
@@ -20,14 +23,13 @@ const departmentNav = [{ href: "/status", label: "Мой статус" }];
 export function AppShell({
   children,
   currentWeek,
-  pathname,
   user,
 }: {
   children: React.ReactNode;
   currentWeek: string;
-  pathname: string;
   user: { name: string; role: UserRole };
 }) {
+  const pathname = usePathname();
   const navItems = isCLevel(user.role) ? cLevelNav : departmentNav;
 
   return (
