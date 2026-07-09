@@ -15,7 +15,7 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
       <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+        <p className="text-xs font-semibold uppercase tracking-wide text-atom-ink">
           ATOM Portfolio
         </p>
         <h1 className="mt-2 text-2xl font-semibold">Вход в систему</h1>
@@ -52,7 +52,7 @@ export default async function LoginPage({
           </label>
           <button
             type="submit"
-            className="w-full rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
+            className="w-full rounded-lg bg-atom px-4 py-2 text-sm font-medium text-atom-ink hover:bg-atom-hover"
           >
             Войти
           </button>

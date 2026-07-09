@@ -104,7 +104,7 @@ export default async function PeoplePage() {
           />
           <button
             type="submit"
-            className="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
+            className="rounded-lg bg-atom px-4 py-2 text-sm font-medium text-atom-ink hover:bg-atom-hover"
           >
             Сохранить
           </button>

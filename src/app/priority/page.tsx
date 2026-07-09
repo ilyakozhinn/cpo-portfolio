@@ -53,7 +53,7 @@ export default async function PriorityPage() {
               <div>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="font-medium text-sky-800 hover:underline"
+                  className="font-medium text-atom-ink hover:underline"
                 >
                   {project.name}
                 </Link>

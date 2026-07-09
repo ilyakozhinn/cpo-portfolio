@@ -59,7 +59,7 @@ export default async function ProjectDetailPage({
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <Link href="/projects" className="text-sm text-sky-700 hover:underline">
+          <Link href="/projects" className="text-sm text-atom-ink hover:underline">
             ← Все проекты
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -76,7 +76,7 @@ export default async function ProjectDetailPage({
               href={domainUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-1 inline-block text-sm text-sky-700 hover:underline"
+              className="mt-1 inline-block text-sm text-atom-ink hover:underline"
             >
               {project.domain}
             </a>
@@ -159,7 +159,7 @@ export default async function ProjectDetailPage({
             </label>
             <button
               type="submit"
-              className="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
+              className="rounded-lg bg-atom px-4 py-2 text-sm font-medium text-atom-ink hover:bg-atom-hover"
             >
               Сохранить
             </button>

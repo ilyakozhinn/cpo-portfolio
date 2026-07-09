@@ -56,7 +56,7 @@ export default async function ProjectsPage() {
                         <>
                           {" "}
                           ·{" "}
-                          <span className="text-sky-700">{project.domain}</span>
+                          <span className="text-atom-ink">{project.domain}</span>
                         </>
                       ) : null}
                     </p>

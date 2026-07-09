@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --accent: #0369a1;
+  --background: #f7f7f2;
+  --foreground: #010101;
+  --accent: #feea36;
+  --accent-hover: #fff567;
+  --accent-muted: #f5d749;
+  --accent-soft: #fff8b8;
+  --accent-border: #e8d44a;
+  --cream: #e0e0ce;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-atom: #feea36;
+  --color-atom-hover: #fff567;
+  --color-atom-muted: #f5d749;
+  --color-atom-soft: #fff8b8;
+  --color-atom-border: #e8d44a;
+  --color-atom-ink: #010101;
+  --color-atom-cream: #e0e0ce;
   --font-sans: var(--font-inter);
 }
 
@@ -16,6 +28,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--foreground);
 }
 
 input,

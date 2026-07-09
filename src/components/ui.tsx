@@ -9,7 +9,7 @@ export function RagBadge({
 }) {
   const styles: Record<string, string> = {
     green: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    yellow: "bg-amber-100 text-amber-800 border-amber-200",
+    yellow: "bg-atom-soft text-atom-ink border-atom-border",
     red: "bg-rose-100 text-rose-800 border-rose-200",
     none: "bg-slate-100 text-slate-600 border-slate-200",
   };
@@ -42,7 +42,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: string }) {
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
         isPaused
           ? "bg-slate-100 text-slate-600 border-slate-200"
-          : "bg-sky-50 text-sky-700 border-sky-200",
+          : "bg-atom-soft text-atom-ink border-atom-border",
       )}
     >
       {isPaused ? "На паузе" : "Активен"}

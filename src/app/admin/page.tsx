@@ -59,7 +59,7 @@ export default async function AdminPage() {
           </select>
           <button
             type="submit"
-            className="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800 md:col-span-2 md:w-fit"
+            className="rounded-lg bg-atom px-4 py-2 text-sm font-medium text-atom-ink hover:bg-atom-hover md:col-span-2 md:w-fit"
           >
             Создать аккаунт
           </button>

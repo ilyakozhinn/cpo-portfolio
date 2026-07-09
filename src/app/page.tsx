@@ -106,7 +106,7 @@ export default async function HomePage() {
                 </p>
               </div>
               {unit.priority === 1 ? (
-                <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-800">
+                <span className="rounded-full bg-atom-soft px-3 py-1 text-xs font-medium text-atom-ink">
                   Высший приоритет
                 </span>
               ) : null}
@@ -131,7 +131,7 @@ export default async function HomePage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="rounded-lg border border-slate-200 p-4 hover:border-sky-300 hover:bg-sky-50/40"
+                    className="rounded-lg border border-slate-200 p-4 hover:border-atom-border hover:bg-atom-soft/60"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>

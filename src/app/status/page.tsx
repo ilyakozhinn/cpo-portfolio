@@ -57,7 +57,7 @@ export default async function StatusPage({
                     href={`/status?project=${project.id}`}
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
                       project.id === selectedProjectId
-                        ? "border-sky-300 bg-sky-50"
+                        ? "border-atom-border bg-atom-soft"
                         : "border-slate-100 hover:bg-slate-50"
                     }`}
                   >
@@ -148,7 +148,7 @@ export default async function StatusPage({
                     href={`/status?project=${project.id}`}
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
                       project.id === selectedProjectId
-                        ? "border-sky-300 bg-sky-50"
+                        ? "border-atom-border bg-atom-soft"
                         : "border-slate-100 hover:bg-slate-50"
                     }`}
                   >
