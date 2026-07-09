@@ -37,9 +37,6 @@ export function AppShell({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-atom-ink">
-              ATOM Portfolio
-            </p>
             <h1 className="text-xl font-semibold">
               {isCLevel(user.role) ? "CPO Command Center" : "Портфель проектов"}
             </h1>
