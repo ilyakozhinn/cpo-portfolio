@@ -68,6 +68,15 @@ npm run build      # production-сборка
 
 ## Стек
 
-Next.js · TypeScript · Tailwind · Prisma · SQLite
+Next.js · TypeScript · Tailwind · Prisma · **Neon Postgres**
 
-База данных хранится в `prisma/dev.db` — один файл, без установки Postgres.
+Production: Neon (Vercel Marketplace). Локально — тот же Neon через `.env`.
+
+```bash
+# после клонирования
+cp .env.example .env   # или vercel env pull
+npm install
+npx prisma migrate deploy
+npm run db:seed        # только первый раз
+npm run dev
+```
