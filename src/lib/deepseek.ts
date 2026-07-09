@@ -3,7 +3,7 @@ import { DEPARTMENT_LABELS, type Department } from "@/lib/permissions";
 import { shiftWeek } from "@/lib/week";
 
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
-const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL ?? "deepseek-chat";
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL ?? "deepseek-v4-flash";
 
 export type AiRag = "green" | "yellow" | "red";
 
@@ -89,6 +89,7 @@ async function deepseekChat(
       body: JSON.stringify({
         model: DEEPSEEK_MODEL,
         temperature: 0.2,
+        thinking: { type: "disabled" },
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
