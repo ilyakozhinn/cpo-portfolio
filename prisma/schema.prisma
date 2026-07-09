@@ -36,22 +36,24 @@ model TelegramPendingUser {
 }
 
 model TelegramSession {
-  id              String   @id @default(cuid())
-  telegramId      String   @unique
-  userId          String?
-  step            String   @default("idle")
-  projectId       String?
-  weekStart       String?
-  draftRag        String?
-  draftProgress   String?
-  draftTasks      String?
-  draftRisks      String?
-  draftBlockers   String?
-  draftAskToCpo   String?
-  draftMilestone  String?
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  telegramId           String   @unique
+  userId               String?
+  step                 String   @default("idle")
+  projectId            String?
+  weekStart            String?
+  draftRag             String?
+  draftProgress        String?
+  draftTasks           String?
+  draftRisks           String?
+  draftBlockers        String?
+  draftAskToCpo        String?
+  draftMilestone       String?
+  draftPreviousCheck   String?
+  followUpQuestion     String?
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@index([userId])
 }
@@ -89,27 +91,44 @@ model Person {
 }
 
 model Project {
-  id              String              @id @default(cuid())
+  id              String                @id @default(cuid())
   name            String
   domain          String?
-  lifecycle       String              @default("active")
+  lifecycle       String                @default("active")
   priority        Int
-  strategicWeight Int                 @default(3)
+  strategicWeight Int                   @default(3)
   ragOverride     String?
   businessUnitId  String
   ownerId         String?
-  businessUnit    BusinessUnit        @relation(fields: [businessUnitId], references: [id], onDelete: Cascade)
-  owner           Person?             @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  businessUnit    BusinessUnit          @relation(fields: [businessUnitId], references: [id], onDelete: Cascade)
+  owner           Person?               @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   allocations     Allocation[]
   weeklyStatuses  WeeklyStatus[]
   decisions       Decision[]
   assignments     ProjectAssignment[]
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  aiSummaries     ProjectWeeklySummary[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 
   @@index([businessUnitId])
   @@index([ownerId])
   @@index([lifecycle])
+}
+
+model ProjectWeeklySummary {
+  id                 String   @id @default(cuid())
+  projectId          String
+  weekStart          String
+  summary            String
+  aiRag              String
+  previousTasksCheck String?
+  rawJson            String?
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([projectId, weekStart])
+  @@index([weekStart])
 }
 
 model Allocation {

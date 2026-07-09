@@ -48,8 +48,12 @@ const RAG_PRIORITY: Record<RagValue, number> = {
 export function resolveProjectRag(
   ragOverride: string | null | undefined,
   departmentRags: (string | null | undefined)[],
+  aiRag?: string | null,
 ): RagValue {
   if (ragOverride) return ragOverride as RagValue;
+  if (aiRag === "green" || aiRag === "yellow" || aiRag === "red") {
+    return aiRag;
+  }
 
   let worst: RagValue = "none";
   for (const rag of departmentRags) {
@@ -73,7 +77,8 @@ export async function getPortfolioSnapshot(weekStart?: string, user?: SessionUse
       ? await getAssignedProjectIds(user.id)
       : null;
 
-  const [units, allocations, people, statusesThisWeek] = await Promise.all([
+  const [units, allocations, people, statusesThisWeek, aiSummaries] =
+    await Promise.all([
     prisma.businessUnit.findMany({
       orderBy: { priority: "asc" },
       include: {
@@ -112,7 +117,14 @@ export async function getPortfolioSnapshot(weekStart?: string, user?: SessionUse
       where: { weekStart: currentWeek },
       include: { author: true },
     }),
+    prisma.projectWeeklySummary.findMany({
+      where: { weekStart: currentWeek },
+    }),
   ]);
+
+  const aiSummaryByProject = new Map(
+    aiSummaries.map((summary) => [summary.projectId, summary]),
+  );
 
   const filteredUnits = units.map((unit) => ({
     ...unit,
@@ -182,6 +194,7 @@ export async function getPortfolioSnapshot(weekStart?: string, user?: SessionUse
     personLoad,
     overallocatedPeople: personLoad.filter((item) => item.overallocated),
     statusByProjectDept,
+    aiSummaryByProject,
   };
 }
 

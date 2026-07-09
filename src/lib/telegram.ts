@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import {
+  generatePreviousTasksFollowUp,
+  refreshProjectAiSummary,
+} from "@/lib/deepseek";
+import {
   DEPARTMENT_LABELS,
   ROLE_LABELS,
   roleToDepartment,
@@ -7,7 +11,7 @@ import {
   type UserRole,
 } from "@/lib/permissions";
 import { getCurrentWeekStart } from "@/lib/queries";
-import { formatWeekLabel } from "@/lib/week";
+import { formatWeekLabel, shiftWeek } from "@/lib/week";
 
 const TELEGRAM_API = "https://api.telegram.org";
 
@@ -54,6 +58,8 @@ type SessionDraft = {
   draftBlockers?: string | null;
   draftAskToCpo?: string | null;
   draftMilestone?: string | null;
+  draftPreviousCheck?: string | null;
+  followUpQuestion?: string | null;
 };
 
 function botToken() {
@@ -119,6 +125,8 @@ async function resetSession(telegramId: string, userId?: string | null) {
     draftBlockers: null,
     draftAskToCpo: null,
     draftMilestone: null,
+    draftPreviousCheck: null,
+    followUpQuestion: null,
     ...(userId !== undefined ? { userId } : {}),
   });
 }
@@ -236,6 +244,8 @@ async function startStatusFunnel(
     draftBlockers: null,
     draftAskToCpo: null,
     draftMilestone: null,
+    draftPreviousCheck: null,
+    followUpQuestion: null,
   });
 
   const department = departmentForUser(user.role as UserRole);
@@ -250,7 +260,7 @@ async function startStatusFunnel(
       `${formatWeekLabel(weekStart)}`,
       `Роль: ${ROLE_LABELS[user.role as UserRole]} · ${departmentLabel}`,
       ``,
-      `<b>Шаг 1/7.</b> Выберите проект:`,
+      `<b>Шаг 1/8.</b> Выберите проект:`,
     ].join("\n"),
     projectKeyboard(projects),
   );
@@ -259,15 +269,21 @@ async function startStatusFunnel(
 async function askNextStep(
   chatId: number,
   step: string,
-  extras?: { projectName?: string },
+  extras?: { projectName?: string; followUpQuestion?: string | null },
 ) {
   const prompts: Record<string, string> = {
-    rag: `<b>Шаг 2/7.</b> Выберите RAG-статус проекта${extras?.projectName ? ` «${extras.projectName}»` : ""}:`,
-    progress: `<b>Шаг 3/7.</b> Что сделано / прогресс за неделю?`,
-    tasks: `<b>Шаг 4/7.</b> Какие задачи на следующую неделю?`,
-    risks: `<b>Шаг 5/7.</b> Какие риски?`,
-    blockers: `<b>Шаг 6/7.</b> Какие блокеры?`,
-    ask: `<b>Шаг 7/7.</b> Ask к CPO (или нажмите «Пропустить»):`,
+    previous_tasks: `<b>Шаг 2/8.</b> ${
+      extras?.followUpQuestion?.trim() ||
+      `Выполнены ли задачи прошлой недели по проекту${
+        extras?.projectName ? ` «${extras.projectName}»` : ""
+      }?`
+    }`,
+    rag: `<b>Шаг 3/8.</b> Выберите RAG-статус проекта${extras?.projectName ? ` «${extras.projectName}»` : ""}:`,
+    progress: `<b>Шаг 4/8.</b> Что сделано / прогресс за неделю?`,
+    tasks: `<b>Шаг 5/8.</b> Какие задачи на следующую неделю?`,
+    risks: `<b>Шаг 6/8.</b> Какие риски?`,
+    blockers: `<b>Шаг 7/8.</b> Какие блокеры?`,
+    ask: `<b>Шаг 8/8.</b> Ask к CPO (или нажмите «Пропустить»):`,
     milestone: `<b>Финал.</b> Следующий milestone (или «Пропустить»):`,
   };
 
@@ -276,12 +292,91 @@ async function askNextStep(
     return;
   }
 
-  if (step === "ask" || step === "milestone" || step === "risks" || step === "blockers") {
+  if (
+    step === "ask" ||
+    step === "milestone" ||
+    step === "risks" ||
+    step === "blockers" ||
+    step === "previous_tasks"
+  ) {
     await sendTelegramMessage(chatId, prompts[step], skipKeyboard(step));
     return;
   }
 
   await sendTelegramMessage(chatId, prompts[step] ?? "Продолжаем.");
+}
+
+async function beginAfterProjectSelected(
+  chatId: number,
+  telegramId: string,
+  user: NonNullable<Awaited<ReturnType<typeof findAuthorizedUser>>>,
+  projectId: string,
+) {
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project) {
+    await sendTelegramMessage(chatId, "Проект не найден. Напишите /status.");
+    return;
+  }
+
+  const department = departmentForUser(user.role as UserRole);
+  if (!department) {
+    await sendTelegramMessage(chatId, "Для вашей роли отдел не определён.");
+    return;
+  }
+
+  const session = await prisma.telegramSession.findUnique({
+    where: { telegramId },
+  });
+  const weekStart = session?.weekStart ?? (await getCurrentWeekStart());
+  const previousWeek = shiftWeek(weekStart, -1);
+
+  const previousStatus = await prisma.weeklyStatus.findUnique({
+    where: {
+      projectId_weekStart_department: {
+        projectId,
+        weekStart: previousWeek,
+        department,
+      },
+    },
+  });
+
+  const hasPreviousPlan = Boolean(
+    previousStatus?.tasks?.trim() ||
+      previousStatus?.progress?.trim() ||
+      previousStatus?.nextMilestone?.trim(),
+  );
+
+  if (hasPreviousPlan) {
+    const followUp =
+      (await generatePreviousTasksFollowUp({
+        projectName: project.name,
+        departmentLabel: DEPARTMENT_LABELS[department],
+        previousTasks: previousStatus?.tasks,
+        previousProgress: previousStatus?.progress,
+        previousMilestone: previousStatus?.nextMilestone,
+      })) ??
+      `Выполнены ли задачи прошлой недели по проекту «${project.name}»?`;
+
+    await updateSession(telegramId, {
+      projectId,
+      step: "previous_tasks",
+      followUpQuestion: followUp,
+      draftPreviousCheck: null,
+    });
+    await askNextStep(chatId, "previous_tasks", {
+      projectName: project.name,
+      followUpQuestion: followUp,
+    });
+    return;
+  }
+
+  await updateSession(telegramId, {
+    projectId,
+    step: "rag",
+    followUpQuestion: null,
+    draftPreviousCheck: null,
+  });
+  await askNextStep(chatId, "rag", { projectName: project.name });
 }
 
 async function saveStatusFromSession(
@@ -333,6 +428,12 @@ async function saveStatusFromSession(
       authorId: user.id,
     },
   });
+
+  try {
+    await refreshProjectAiSummary(session.projectId, session.weekStart);
+  } catch (error) {
+    console.error("AI summary refresh failed", error);
+  }
 
   const project = await prisma.project.findUnique({
     where: { id: session.projectId },
@@ -387,6 +488,13 @@ async function handleAuthorizedText(
   }
 
   switch (session.step) {
+    case "previous_tasks":
+      await updateSession(telegramId, {
+        draftPreviousCheck: normalized,
+        step: "rag",
+      });
+      await askNextStep(chatId, "rag");
+      return;
     case "progress":
       await updateSession(telegramId, {
         draftProgress: normalized,
@@ -423,10 +531,24 @@ async function handleAuthorizedText(
       await askNextStep(chatId, "milestone");
       return;
     case "milestone": {
-      await updateSession(telegramId, {
-        draftMilestone: normalized,
-        step: "saving",
-      });
+      const previousNote = session.draftPreviousCheck?.trim();
+      if (previousNote) {
+        await updateSession(telegramId, {
+          draftProgress: [
+            `Проверка прошлых задач: ${previousNote}`,
+            session.draftProgress ?? "",
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          draftMilestone: normalized,
+          step: "saving",
+        });
+      } else {
+        await updateSession(telegramId, {
+          draftMilestone: normalized,
+          step: "saving",
+        });
+      }
       const projectName = await saveStatusFromSession(telegramId, user);
       await resetSession(telegramId, user.id);
       await sendTelegramMessage(
@@ -463,17 +585,7 @@ async function handleCallback(
 
   if (data.startsWith("project:")) {
     const projectId = data.slice("project:".length);
-    const project = await prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) {
-      await sendTelegramMessage(chatId, "Проект не найден. Напишите /status.");
-      return;
-    }
-
-    await updateSession(telegramId, {
-      projectId,
-      step: "rag",
-    });
-    await askNextStep(chatId, "rag", { projectName: project.name });
+    await beginAfterProjectSelected(chatId, telegramId, user, projectId);
     return;
   }
 
@@ -489,6 +601,14 @@ async function handleCallback(
 
   if (data.startsWith("skip:")) {
     const step = data.slice("skip:".length);
+    if (step === "previous_tasks") {
+      await updateSession(telegramId, {
+        draftPreviousCheck: null,
+        step: "rag",
+      });
+      await askNextStep(chatId, "rag");
+      return;
+    }
     if (step === "risks") {
       await updateSession(telegramId, { draftRisks: null, step: "blockers" });
       await askNextStep(chatId, "blockers");
@@ -505,10 +625,27 @@ async function handleCallback(
       return;
     }
     if (step === "milestone") {
-      await updateSession(telegramId, {
-        draftMilestone: null,
-        step: "saving",
+      const session = await prisma.telegramSession.findUnique({
+        where: { telegramId },
       });
+      const previousNote = session?.draftPreviousCheck?.trim();
+      if (previousNote) {
+        await updateSession(telegramId, {
+          draftProgress: [
+            `Проверка прошлых задач: ${previousNote}`,
+            session?.draftProgress ?? "",
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          draftMilestone: null,
+          step: "saving",
+        });
+      } else {
+        await updateSession(telegramId, {
+          draftMilestone: null,
+          step: "saving",
+        });
+      }
       const projectName = await saveStatusFromSession(telegramId, user);
       await resetSession(telegramId, user.id);
       await sendTelegramMessage(

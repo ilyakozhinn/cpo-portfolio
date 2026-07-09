@@ -119,7 +119,12 @@ export default async function HomePage() {
                       statusKey(project.id, department),
                     )?.rag,
                 );
-                const rag = resolveProjectRag(project.ragOverride, weekRags);
+                const aiSummary = snapshot.aiSummaryByProject.get(project.id);
+                const rag = resolveProjectRag(
+                  project.ragOverride,
+                  weekRags,
+                  aiSummary?.aiRag,
+                );
                 const hasMissing = DEPARTMENTS.some(
                   (department) =>
                     !snapshot.statusByProjectDept.has(
@@ -143,6 +148,16 @@ export default async function HomePage() {
                       </div>
                       <RagBadge rag={rag} />
                     </div>
+                    {aiSummary?.summary ? (
+                      <p className="mt-3 text-sm text-slate-600">
+                        {aiSummary.summary}
+                      </p>
+                    ) : null}
+                    {aiSummary?.previousTasksCheck ? (
+                      <p className="mt-2 text-xs text-slate-500">
+                        Прошлые задачи: {aiSummary.previousTasksCheck}
+                      </p>
+                    ) : null}
                     <div className="mt-3 flex flex-wrap gap-2">
                       {DEPARTMENTS.map((department) => {
                         const status = snapshot.statusByProjectDept.get(

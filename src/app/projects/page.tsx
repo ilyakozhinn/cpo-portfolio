@@ -37,7 +37,12 @@ export default async function ProjectsPage() {
                     statusKey(project.id, department),
                   )?.rag,
               );
-              const rag = resolveProjectRag(project.ragOverride, weekRags);
+              const aiSummary = snapshot.aiSummaryByProject.get(project.id);
+              const rag = resolveProjectRag(
+                project.ragOverride,
+                weekRags,
+                aiSummary?.aiRag,
+              );
 
               return (
                 <Link

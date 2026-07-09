@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireCLevel, requireUser } from "@/lib/auth";
+import { refreshProjectAiSummary } from "@/lib/deepseek";
 import { setCurrentWeekStart } from "@/lib/queries";
 import {
   canEditDepartmentStatus,
@@ -81,6 +82,12 @@ export async function saveWeeklyStatus(formData: FormData) {
       authorId: user.id,
     },
   });
+
+  try {
+    await refreshProjectAiSummary(projectId, weekStart);
+  } catch (error) {
+    console.error("AI summary refresh failed", error);
+  }
 
   revalidateAll();
 }

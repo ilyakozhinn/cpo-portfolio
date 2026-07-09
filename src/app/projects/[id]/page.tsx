@@ -16,7 +16,6 @@ import {
   getCurrentWeekStart,
   getProjectDetail,
   resolveProjectRag,
-  statusKey,
 } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
 import { formatWeekLabel } from "@/lib/week";
@@ -40,6 +39,11 @@ export default async function ProjectDetailPage({
     where: { projectId: id, weekStart: currentWeek },
     include: { author: true },
   });
+  const aiSummary = await prisma.projectWeeklySummary.findUnique({
+    where: {
+      projectId_weekStart: { projectId: id, weekStart: currentWeek },
+    },
+  });
 
   const statusMap = new Map(
     weekStatuses.map((status) => [status.department as Department, status]),
@@ -47,6 +51,7 @@ export default async function ProjectDetailPage({
   const rag = resolveProjectRag(
     project.ragOverride,
     DEPARTMENTS.map((department) => statusMap.get(department)?.rag),
+    aiSummary?.aiRag,
   );
 
   const domainUrl = project.domain
@@ -71,6 +76,19 @@ export default async function ProjectDetailPage({
             {project.businessUnit.name} ·{" "}
             {project.owner?.name ?? "Владелец не назначен"}
           </p>
+          {aiSummary?.summary ? (
+            <div className="mt-4 max-w-3xl rounded-xl border border-atom-border bg-atom-soft/50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                AI-саммари недели
+              </p>
+              <p className="mt-2 text-sm text-slate-700">{aiSummary.summary}</p>
+              {aiSummary.previousTasksCheck ? (
+                <p className="mt-2 text-xs text-slate-500">
+                  Прошлые задачи: {aiSummary.previousTasksCheck}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           {domainUrl ? (
             <a
               href={domainUrl}
