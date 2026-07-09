@@ -163,13 +163,13 @@ export default async function ProjectDetailPage({
               </label>
             </div>
             <label className="block text-sm">
-              <span className="text-slate-600">RAG override (CPO)</span>
+              <span className="text-slate-600">Статус вручную (CPO)</span>
               <select
                 name="ragOverride"
                 defaultValue={project.ragOverride ?? "none"}
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
               >
-                <option value="none">Без override</option>
+                <option value="none">Без переопределения</option>
                 <option value="green">Зелёный</option>
                 <option value="yellow">Жёлтый</option>
                 <option value="red">Красный</option>

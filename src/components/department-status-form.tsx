@@ -30,7 +30,7 @@ export function DepartmentStatusForm({
       <input type="hidden" name="weekStart" value={weekStart} />
       <input type="hidden" name="department" value={department} />
       <label className="block text-sm">
-        <span className="text-slate-600">RAG</span>
+        <span className="text-slate-600">Статус</span>
         <select
           name="rag"
           defaultValue={status?.rag ?? "green"}

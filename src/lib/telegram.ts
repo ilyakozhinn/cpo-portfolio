@@ -278,7 +278,7 @@ async function askNextStep(
         extras?.projectName ? ` «${extras.projectName}»` : ""
       }?`
     }`,
-    rag: `<b>Шаг 3/8.</b> Выберите RAG-статус проекта${extras?.projectName ? ` «${extras.projectName}»` : ""}:`,
+    rag: `<b>Шаг 3/8.</b> Выберите статус проекта${extras?.projectName ? ` «${extras.projectName}»` : ""}:`,
     progress: `<b>Шаг 4/8.</b> Что сделано / прогресс за неделю?`,
     tasks: `<b>Шаг 5/8.</b> Какие задачи на следующую неделю?`,
     risks: `<b>Шаг 6/8.</b> Какие риски?`,

@@ -56,7 +56,7 @@ function formatStatuses(statuses: StatusLike[]) {
       return [
         `Отдел: ${dept}`,
         `Автор: ${status.author?.name ?? "неизвестно"}`,
-        `RAG: ${status.rag}`,
+        `Статус (green/yellow/red): ${status.rag}`,
         `Прогресс: ${status.progress ?? "—"}`,
         `Задачи: ${status.tasks ?? "—"}`,
         `Риски: ${status.risks ?? "—"}`,
@@ -156,12 +156,12 @@ export async function generateProjectWeeklySummary(input: {
   const system = [
     "Ты CPO-аналитик холдинга ATOM.",
     "По ответам отделов (продукт / разработка / маркетинг) сделай краткое саммари для C-level.",
-    "Оцени общий RAG проекта: green / yellow / red.",
+    "Оцени общий статус здоровья проекта (светофор): green / yellow / red.",
     "green — план выполняется, критичных проблем нет.",
     "yellow — есть риски/задержки, но проект управляем.",
     "red — серьёзные блокеры, срыв плана или нужна эскалация.",
     "Учти выполнение задач прошлой недели, если они есть.",
-    "Ответь строго JSON: {\"summary\":\"...\",\"aiRag\":\"green|yellow|red\",\"previousTasksCheck\":\"...\"}.",
+    "Ответь строго JSON: {\"summary\":\"...\",\"aiRag\":\"green|yellow|red\",\"previousTasksCheck\":\"...\"}. Поле aiRag — это статус green/yellow/red.",
     "summary: 2-4 предложения на русском.",
     "previousTasksCheck: коротко, выполнены ли прошлые задачи; если данных нет — null.",
   ].join(" ");

@@ -29,7 +29,7 @@ export default async function PriorityPage() {
         <div className="grid grid-cols-[80px_1fr_120px_160px_120px] gap-3 border-b border-slate-100 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
           <div>#</div>
           <div>Проект</div>
-          <div>RAG</div>
+          <div>Статус</div>
           <div>Вес</div>
           <div>Действия</div>
         </div>
