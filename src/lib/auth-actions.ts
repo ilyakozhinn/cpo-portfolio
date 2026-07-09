@@ -25,6 +25,14 @@ function revalidateAll() {
   revalidatePath("/settings");
 }
 
+function adminRedirect(params: { success?: string; error?: string }): never {
+  const search = new URLSearchParams();
+  if (params.success) search.set("success", params.success);
+  if (params.error) search.set("error", params.error);
+  const qs = search.toString();
+  redirect(qs ? `/admin?${qs}` : "/admin");
+}
+
 export async function login(formData: FormData) {
   const email = String(formData.get("email") ?? "")
     .trim()
@@ -70,7 +78,12 @@ export async function createUser(formData: FormData) {
   const role = String(formData.get("role") ?? "") as UserRole;
 
   if (!email || !name || !password || !USER_ROLES.includes(role)) {
-    return;
+    adminRedirect({ error: "fill_required" });
+  }
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    adminRedirect({ error: "email_taken" });
   }
 
   await prisma.user.create({
@@ -83,12 +96,16 @@ export async function createUser(formData: FormData) {
   });
 
   revalidateAll();
+  adminRedirect({ success: "user_created" });
 }
 
 export async function toggleUserActive(formData: FormData) {
   await requireCLevel();
   const userId = String(formData.get("userId") ?? "");
   const isActive = String(formData.get("isActive") ?? "") === "true";
+  if (!userId) {
+    adminRedirect({ error: "missing_user" });
+  }
 
   await prisma.user.update({
     where: { id: userId },
@@ -96,13 +113,16 @@ export async function toggleUserActive(formData: FormData) {
   });
 
   revalidateAll();
+  adminRedirect({ success: isActive ? "user_activated" : "user_blocked" });
 }
 
 export async function resetUserPassword(formData: FormData) {
   await requireCLevel();
   const userId = String(formData.get("userId") ?? "");
   const password = String(formData.get("password") ?? "");
-  if (!userId || !password) return;
+  if (!userId || !password) {
+    adminRedirect({ error: "password_required" });
+  }
 
   await prisma.user.update({
     where: { id: userId },
@@ -110,13 +130,16 @@ export async function resetUserPassword(formData: FormData) {
   });
 
   revalidateAll();
+  adminRedirect({ success: "password_reset" });
 }
 
 export async function assignProject(formData: FormData) {
   await requireCLevel();
   const userId = String(formData.get("userId") ?? "");
   const projectId = String(formData.get("projectId") ?? "");
-  if (!userId || !projectId) return;
+  if (!userId || !projectId) {
+    adminRedirect({ error: "project_required" });
+  }
 
   await prisma.projectAssignment.upsert({
     where: {
@@ -127,29 +150,47 @@ export async function assignProject(formData: FormData) {
   });
 
   revalidateAll();
+  adminRedirect({ success: "project_assigned" });
 }
 
 export async function removeProjectAssignment(formData: FormData) {
   await requireCLevel();
   const assignmentId = String(formData.get("assignmentId") ?? "");
-  if (!assignmentId) return;
+  if (!assignmentId) {
+    adminRedirect({ error: "missing_assignment" });
+  }
 
   await prisma.projectAssignment.delete({ where: { id: assignmentId } });
   revalidateAll();
+  adminRedirect({ success: "assignment_removed" });
 }
 
 export async function linkTelegramToUser(formData: FormData) {
   await requireCLevel();
   const userId = String(formData.get("userId") ?? "");
   const telegramId = String(formData.get("telegramId") ?? "").trim();
-  const telegramUsername = String(formData.get("telegramUsername") ?? "").trim() || null;
-  if (!userId || !telegramId) return;
+  const telegramUsername =
+    String(formData.get("telegramUsername") ?? "").trim() || null;
+  if (!userId || !telegramId) {
+    adminRedirect({ error: "telegram_required" });
+  }
 
   const existing = await prisma.user.findFirst({
     where: { telegramId, NOT: { id: userId } },
   });
   if (existing) {
-    throw new Error("Этот Telegram уже привязан к другому пользователю");
+    adminRedirect({ error: "telegram_taken" });
+  }
+
+  const current = await prisma.user.findUnique({ where: { id: userId } });
+  if (!current) {
+    adminRedirect({ error: "missing_user" });
+  }
+
+  if (current.telegramId && current.telegramId !== telegramId) {
+    await prisma.telegramSession.deleteMany({
+      where: { telegramId: current.telegramId },
+    });
   }
 
   await prisma.user.update({
@@ -165,23 +206,31 @@ export async function linkTelegramToUser(formData: FormData) {
   });
 
   revalidateAll();
+  adminRedirect({ success: "telegram_linked" });
 }
 
 export async function unlinkTelegram(formData: FormData) {
   await requireCLevel();
   const userId = String(formData.get("userId") ?? "");
-  if (!userId) return;
+  if (!userId) {
+    adminRedirect({ error: "missing_user" });
+  }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user?.telegramId) return;
+  if (!user?.telegramId) {
+    adminRedirect({ error: "telegram_missing" });
+  }
 
-  await prisma.telegramSession.deleteMany({ where: { telegramId: user.telegramId } });
+  await prisma.telegramSession.deleteMany({
+    where: { telegramId: user.telegramId },
+  });
   await prisma.user.update({
     where: { id: userId },
     data: { telegramId: null, telegramUsername: null },
   });
 
   revalidateAll();
+  adminRedirect({ success: "telegram_unlinked" });
 }
 
 export async function approveTelegramPending(formData: FormData) {
@@ -196,62 +245,115 @@ export async function approveTelegramPending(formData: FormData) {
   const password = String(formData.get("password") ?? "") || "atom2026";
   const existingUserId = String(formData.get("existingUserId") ?? "").trim();
 
+  if (!pendingId) {
+    adminRedirect({ error: "pending_missing" });
+  }
+
   const pending = await prisma.telegramPendingUser.findUnique({
     where: { id: pendingId },
   });
-  if (!pending) return;
-
-  if (existingUserId) {
-    await prisma.user.update({
-      where: { id: existingUserId },
-      data: {
-        telegramId: pending.telegramId,
-        telegramUsername: pending.username,
-        ...(USER_ROLES.includes(role) ? { role } : {}),
-      },
-    });
-    await prisma.telegramSession.upsert({
-      where: { telegramId: pending.telegramId },
-      update: { userId: existingUserId, step: "idle" },
-      create: {
-        telegramId: pending.telegramId,
-        userId: existingUserId,
-        step: "idle",
-      },
-    });
-  } else {
-    if (!name || !email || !USER_ROLES.includes(role)) return;
-
-    const created = await prisma.user.create({
-      data: {
-        email,
-        name,
-        role,
-        passwordHash: await hashPassword(password),
-        telegramId: pending.telegramId,
-        telegramUsername: pending.username,
-      },
-    });
-
-    await prisma.telegramSession.upsert({
-      where: { telegramId: pending.telegramId },
-      update: { userId: created.id, step: "idle" },
-      create: {
-        telegramId: pending.telegramId,
-        userId: created.id,
-        step: "idle",
-      },
-    });
+  if (!pending) {
+    adminRedirect({ error: "pending_missing" });
   }
 
-  await prisma.telegramPendingUser.delete({ where: { id: pendingId } });
+  const telegramTaken = await prisma.user.findFirst({
+    where: {
+      telegramId: pending.telegramId,
+      ...(existingUserId ? { NOT: { id: existingUserId } } : {}),
+    },
+  });
+  if (telegramTaken) {
+    adminRedirect({ error: "telegram_taken" });
+  }
+
+  try {
+    if (existingUserId) {
+      if (!USER_ROLES.includes(role)) {
+        adminRedirect({ error: "role_required" });
+      }
+
+      const target = await prisma.user.findUnique({
+        where: { id: existingUserId },
+      });
+      if (!target) {
+        adminRedirect({ error: "missing_user" });
+      }
+
+      await prisma.user.update({
+        where: { id: existingUserId },
+        data: {
+          telegramId: pending.telegramId,
+          telegramUsername: pending.username,
+          role,
+        },
+      });
+
+      if (target.telegramId && target.telegramId !== pending.telegramId) {
+        await prisma.telegramSession.deleteMany({
+          where: { telegramId: target.telegramId },
+        });
+      }
+
+      await prisma.telegramSession.upsert({
+        where: { telegramId: pending.telegramId },
+        update: { userId: existingUserId, step: "idle" },
+        create: {
+          telegramId: pending.telegramId,
+          userId: existingUserId,
+          step: "idle",
+        },
+      });
+    } else {
+      if (!name || !email || !USER_ROLES.includes(role)) {
+        adminRedirect({ error: "approve_fields" });
+      }
+
+      const emailTaken = await prisma.user.findUnique({ where: { email } });
+      if (emailTaken) {
+        adminRedirect({ error: "email_taken" });
+      }
+
+      const created = await prisma.user.create({
+        data: {
+          email,
+          name,
+          role,
+          passwordHash: await hashPassword(password),
+          telegramId: pending.telegramId,
+          telegramUsername: pending.username,
+        },
+      });
+
+      await prisma.telegramSession.upsert({
+        where: { telegramId: pending.telegramId },
+        update: { userId: created.id, step: "idle" },
+        create: {
+          telegramId: pending.telegramId,
+          userId: created.id,
+          step: "idle",
+        },
+      });
+    }
+
+    await prisma.telegramPendingUser.delete({ where: { id: pendingId } });
+  } catch (error) {
+    console.error("approveTelegramPending failed", error);
+    adminRedirect({ error: "approve_failed" });
+  }
+
   revalidateAll();
+  adminRedirect({
+    success: existingUserId ? "telegram_linked" : "access_granted",
+  });
 }
 
 export async function dismissTelegramPending(formData: FormData) {
   await requireCLevel();
   const pendingId = String(formData.get("pendingId") ?? "");
-  if (!pendingId) return;
+  if (!pendingId) {
+    adminRedirect({ error: "pending_missing" });
+  }
   await prisma.telegramPendingUser.delete({ where: { id: pendingId } });
   revalidateAll();
+  adminRedirect({ success: "pending_dismissed" });
 }

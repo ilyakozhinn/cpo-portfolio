@@ -33,14 +33,14 @@ export function AppShell({
   const navItems = isCLevel(user.role) ? cLevelNav : departmentNav;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold sm:text-xl">
               {isCLevel(user.role) ? "CPO Command Center" : "Портфель проектов"}
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="break-words text-sm text-slate-500">
               {user.name} · {ROLE_LABELS[user.role]} · {formatWeekLabel(currentWeek)}
             </p>
           </div>
@@ -50,7 +50,7 @@ export function AppShell({
                 <form action={goToPreviousWeek.bind(null, currentWeek)}>
                   <button
                     type="submit"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm hover:bg-slate-50 sm:px-3"
                   >
                     ← Неделя
                   </button>
@@ -58,7 +58,7 @@ export function AppShell({
                 <form action={goToTodayWeek}>
                   <button
                     type="submit"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm hover:bg-slate-50 sm:px-3"
                   >
                     Сегодня
                   </button>
@@ -66,7 +66,7 @@ export function AppShell({
                 <form action={goToNextWeek.bind(null, currentWeek)}>
                   <button
                     type="submit"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm hover:bg-slate-50 sm:px-3"
                   >
                     Неделя →
                   </button>
@@ -76,7 +76,7 @@ export function AppShell({
             <form action={logout}>
               <button
                 type="submit"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm hover:bg-slate-50 sm:px-3"
               >
                 Выйти
               </button>
@@ -84,7 +84,7 @@ export function AppShell({
           </div>
         </div>
         <nav className="border-t border-slate-100">
-          <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2">
+          <div className="-mx-0 flex max-w-7xl gap-1 overflow-x-auto px-3 py-2 sm:mx-auto sm:px-4 [scrollbar-width:thin]">
             {navItems.map((item) => {
               const active =
                 item.href === "/"
@@ -94,7 +94,7 @@ export function AppShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${
+                  className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ${
                     active
                       ? "bg-atom-soft text-atom-ink"
                       : "text-slate-600 hover:bg-slate-100"
@@ -107,7 +107,7 @@ export function AppShell({
           </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">{children}</main>
     </div>
   );
 }

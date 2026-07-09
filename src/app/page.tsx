@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Статусы отделов за неделю"
           value={`${snapshot.submittedCount} / ${snapshot.totalSlots}`}
@@ -68,9 +68,9 @@ export default async function HomePage() {
           <h2 className="text-lg font-semibold text-amber-900">
             Не сдали статус на эту неделю
           </h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {snapshot.missingByDepartment.map((item) => (
-              <div key={item.department}>
+              <div key={item.department} className="min-w-0">
                 <p className="text-sm font-medium text-amber-900">
                   {DEPARTMENT_LABELS[item.department]}
                 </p>
@@ -98,15 +98,15 @@ export default async function HomePage() {
             key={unit.id}
             className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
           >
-            <div className="mb-4 flex items-center justify-between">
-              <div>
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <h3 className="text-base font-semibold">{unit.name}</h3>
                 <p className="text-sm text-slate-500">
                   Приоритет направления: {unit.priority}
                 </p>
               </div>
               {unit.priority === 1 ? (
-                <span className="rounded-full bg-atom-soft px-3 py-1 text-xs font-medium text-atom-ink">
+                <span className="w-fit rounded-full bg-atom-soft px-3 py-1 text-xs font-medium text-atom-ink">
                   Высший приоритет
                 </span>
               ) : null}
@@ -136,17 +136,17 @@ export default async function HomePage() {
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="rounded-lg border border-slate-200 p-4 hover:border-atom-border hover:bg-atom-soft/60"
+                    className="min-w-0 rounded-lg border border-slate-200 p-4 hover:border-atom-border hover:bg-atom-soft/60"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium">{project.name}</p>
-                        <p className="mt-1 text-sm text-slate-500">
+                      <div className="min-w-0">
+                        <p className="break-words font-medium">{project.name}</p>
+                        <p className="mt-1 break-words text-sm text-slate-500">
                           {project.owner?.name ?? "Владелец не назначен"}
                           {project.domain ? ` · ${project.domain}` : ""}
                         </p>
                       </div>
-                      <RagBadge rag={rag} />
+                      <RagBadge rag={rag} className="shrink-0" />
                     </div>
                     {aiSummary?.summary ? (
                       <p className="mt-3 text-sm text-slate-600">

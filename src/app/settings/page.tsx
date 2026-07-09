@@ -26,14 +26,14 @@ export default async function SettingsPage() {
         <p className="mt-2 text-sm text-slate-600">
           Сейчас выбрана: {formatWeekLabel(currentWeek)}
         </p>
-        <form action={setWeekStart} className="mt-4 flex flex-wrap items-end gap-3">
-          <label className="block text-sm">
+        <form action={setWeekStart} className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <label className="block min-w-0 flex-1 text-sm sm:max-w-xs">
             <span className="text-slate-600">Начало недели (понедельник)</span>
             <input
               type="date"
               name="weekStart"
               defaultValue={currentWeek}
-              className="mt-1 rounded-lg border border-slate-200 px-3 py-2"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
             />
           </label>
           <button
@@ -51,22 +51,22 @@ export default async function SettingsPage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="font-semibold">Добавить проект</h3>
-        <form action={createProject} className="mt-4 grid gap-3 md:grid-cols-2">
+        <form action={createProject} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
             name="name"
             placeholder="Название проекта"
             required
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <input
             name="domain"
             placeholder="Домен (например jggl.ai)"
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <select
             name="businessUnitId"
             required
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">Направление</option>
             {units.map((unit) => (
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
           </select>
           <select
             name="ownerId"
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">Владелец</option>
             {people.map((person) => (
@@ -88,7 +88,7 @@ export default async function SettingsPage() {
           </select>
           <button
             type="submit"
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 md:col-span-2 md:w-fit"
+            className="rounded-lg border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 sm:col-span-2 sm:w-fit"
           >
             Создать проект
           </button>

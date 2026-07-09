@@ -41,10 +41,10 @@ export default async function StatusPage({
           </p>
         </div>
 
-        <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <section className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="font-semibold">Active-проекты</h3>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 max-h-[40vh] space-y-2 overflow-y-auto lg:max-h-none">
               {snapshot.activeProjects.map((project) => {
                 const allSubmitted = DEPARTMENTS.every((department) =>
                   snapshot.statusByProjectDept.has(
@@ -55,17 +55,17 @@ export default async function StatusPage({
                   <Link
                     key={project.id}
                     href={`/status?project=${project.id}`}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                    className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm ${
                       project.id === selectedProjectId
                         ? "border-atom-border bg-atom-soft"
                         : "border-slate-100 hover:bg-slate-50"
                     }`}
                   >
-                    <span>{project.name}</span>
+                    <span className="min-w-0 break-words">{project.name}</span>
                     <span
-                      className={
+                      className={`shrink-0 ${
                         allSubmitted ? "text-emerald-700" : "text-amber-700"
-                      }
+                      }`}
                     >
                       {allSubmitted ? "Все сданы" : "Ждём"}
                     </span>
@@ -75,10 +75,10 @@ export default async function StatusPage({
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             {selectedProject ? (
               <>
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
                   <h3 className="text-lg font-semibold">{selectedProject.name}</h3>
                   <p className="text-sm text-slate-500">
                     {selectedProject.owner?.name ?? "Владелец не назначен"}
@@ -99,7 +99,7 @@ export default async function StatusPage({
                 ))}
               </>
             ) : (
-              <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm sm:p-12">
                 Выберите проект слева, чтобы увидеть статусы всех отделов
               </div>
             )}
@@ -131,10 +131,10 @@ export default async function StatusPage({
         </p>
       </div>
 
-      <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
+      <section className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <h3 className="font-semibold">Мои проекты</h3>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 max-h-[40vh] space-y-2 overflow-y-auto lg:max-h-none">
             {context.projects.length === 0 ? (
               <p className="text-sm text-slate-500">
                 C-level ещё не назначил вам проекты. Обратитесь к администратору.
@@ -146,17 +146,17 @@ export default async function StatusPage({
                   <Link
                     key={project.id}
                     href={`/status?project=${project.id}`}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                    className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm ${
                       project.id === selectedProjectId
                         ? "border-atom-border bg-atom-soft"
                         : "border-slate-100 hover:bg-slate-50"
                     }`}
                   >
-                    <span>{project.name}</span>
+                    <span className="min-w-0 break-words">{project.name}</span>
                     <span
-                      className={
+                      className={`shrink-0 ${
                         submitted ? "text-emerald-700" : "text-amber-700"
-                      }
+                      }`}
                     >
                       {submitted ? "Сдан" : "Ждём"}
                     </span>
@@ -167,7 +167,7 @@ export default async function StatusPage({
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           {selectedProject ? (
             <DepartmentStatusPanel
               department={department}
@@ -179,7 +179,7 @@ export default async function StatusPage({
               projectName={selectedProject.name}
             />
           ) : (
-            <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 shadow-sm">
+            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 shadow-sm sm:p-12">
               Выберите проект, чтобы заполнить статус своего отдела
             </div>
           )}

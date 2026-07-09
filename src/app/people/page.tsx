@@ -45,17 +45,17 @@ export default async function PeoplePage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="font-semibold">Добавить человека</h3>
-        <form action={createPerson} className="mt-4 grid gap-3 md:grid-cols-4">
+        <form action={createPerson} className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           <input
             name="name"
             placeholder="ФИО"
             required
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
           />
           <input
             name="role"
             placeholder="Роль"
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <button
             type="submit"
@@ -68,12 +68,12 @@ export default async function PeoplePage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="font-semibold">Аллокация на текущую неделю</h3>
-        <form action={saveAllocation} className="mt-4 grid gap-3 md:grid-cols-4">
+        <form action={saveAllocation} className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           <input type="hidden" name="weekStart" value={currentWeek} />
           <select
             name="personId"
             required
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">Человек</option>
             {heatmap.map((row) => (
@@ -85,7 +85,7 @@ export default async function PeoplePage() {
           <select
             name="projectId"
             required
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">Проект</option>
             {activeProjects.map((project) => (
@@ -100,7 +100,7 @@ export default async function PeoplePage() {
             min={1}
             max={100}
             defaultValue={20}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <button
             type="submit"
@@ -111,65 +111,71 @@ export default async function PeoplePage() {
         </form>
       </section>
 
-      <section className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-left">
-            <tr>
-              <th className="px-4 py-3 font-medium">Человек</th>
-              {weeks.map((weekStart) => (
-                <th key={weekStart} className="px-4 py-3 font-medium">
-                  {formatWeekShort(weekStart)}
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto [scrollbar-width:thin]">
+          <table className="min-w-[640px] w-full text-sm">
+            <thead className="bg-slate-50 text-left">
+              <tr>
+                <th className="sticky left-0 z-10 bg-slate-50 px-4 py-3 font-medium">
+                  Человек
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {heatmap.map((row) => (
-              <tr key={row.person.id} className="border-t border-slate-100">
-                <td className="px-4 py-3 font-medium">
-                  <div>{row.person.name}</div>
-                  <div className="text-xs text-slate-500">
-                    {row.person.role ?? "Роль не указана"}
-                  </div>
-                </td>
-                {row.weekTotals.map((week) => {
-                  const overloaded = week.total > 100;
-                  const loaded = week.total > 0;
-                  return (
-                    <td key={week.weekStart} className="px-4 py-3">
-                      <div
-                        className={`rounded-lg px-3 py-2 text-center ${
-                          overloaded
-                            ? "bg-rose-100 text-rose-800"
-                            : loaded
-                              ? "bg-emerald-50 text-emerald-800"
-                              : "bg-slate-50 text-slate-400"
-                        }`}
-                      >
-                        {week.total > 0 ? `${week.total}%` : "—"}
-                      </div>
-                      {week.allocations.length > 0 ? (
-                        <div className="mt-1 space-y-1 text-xs text-slate-500">
-                          {week.allocations.map((allocation) => (
-                            <div key={allocation.id}>
-                              <Link
-                                href={`/projects/${allocation.projectId}`}
-                                className="hover:underline"
-                              >
-                                {allocation.project.name}
-                              </Link>
-                              : {allocation.percent}%
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-                    </td>
-                  );
-                })}
+                {weeks.map((weekStart) => (
+                  <th key={weekStart} className="px-4 py-3 font-medium whitespace-nowrap">
+                    {formatWeekShort(weekStart)}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {heatmap.map((row) => (
+                <tr key={row.person.id} className="border-t border-slate-100">
+                  <td className="sticky left-0 z-10 bg-white px-4 py-3 font-medium">
+                    <div className="max-w-[140px] truncate sm:max-w-none">
+                      {row.person.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {row.person.role ?? "Роль не указана"}
+                    </div>
+                  </td>
+                  {row.weekTotals.map((week) => {
+                    const overloaded = week.total > 100;
+                    const loaded = week.total > 0;
+                    return (
+                      <td key={week.weekStart} className="px-4 py-3">
+                        <div
+                          className={`rounded-lg px-3 py-2 text-center ${
+                            overloaded
+                              ? "bg-rose-100 text-rose-800"
+                              : loaded
+                                ? "bg-emerald-50 text-emerald-800"
+                                : "bg-slate-50 text-slate-400"
+                          }`}
+                        >
+                          {week.total > 0 ? `${week.total}%` : "—"}
+                        </div>
+                        {week.allocations.length > 0 ? (
+                          <div className="mt-1 space-y-1 text-xs text-slate-500">
+                            {week.allocations.map((allocation) => (
+                              <div key={allocation.id} className="break-words">
+                                <Link
+                                  href={`/projects/${allocation.projectId}`}
+                                  className="hover:underline"
+                                >
+                                  {allocation.project.name}
+                                </Link>
+                                : {allocation.percent}%
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

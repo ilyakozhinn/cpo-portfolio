@@ -13,8 +13,8 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-3 py-6 sm:px-4 sm:py-8">
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-wide text-atom-ink">
           ATOM Portfolio
         </p>
@@ -37,7 +37,7 @@ export default async function LoginPage({
               name="email"
               type="email"
               required
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
               placeholder="cpo@atom.local"
             />
           </label>
@@ -47,7 +47,7 @@ export default async function LoginPage({
               name="password"
               type="password"
               required
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
             />
           </label>
           <button
@@ -72,13 +72,15 @@ export default async function LoginPage({
                 key={account.email}
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                   <span className="font-medium text-slate-800">
                     {getDemoAccountLabel(account.role)}
                   </span>
-                  <span className="font-mono text-slate-600">{account.email}</span>
+                  <span className="break-all font-mono text-slate-600">
+                    {account.email}
+                  </span>
                 </div>
-                <p className="mt-1 text-slate-500">{account.projects}</p>
+                <p className="mt-1 break-words text-slate-500">{account.projects}</p>
               </div>
             ))}
           </div>

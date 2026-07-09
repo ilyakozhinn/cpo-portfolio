@@ -138,13 +138,13 @@ export default async function ProjectDetailPage({
                 ))}
               </select>
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className="block text-sm">
                 <span className="text-slate-600">Статус</span>
                 <select
                   name="lifecycle"
                   defaultValue={project.lifecycle}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+                  className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
                 >
                   <option value="active">Активен</option>
                   <option value="paused">На паузе</option>
@@ -158,7 +158,7 @@ export default async function ProjectDetailPage({
                   max={5}
                   name="strategicWeight"
                   defaultValue={project.strategicWeight}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+                  className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
                 />
               </label>
             </div>
@@ -204,14 +204,14 @@ export default async function ProjectDetailPage({
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="font-semibold">Аллокация на неделю</h3>
-        <form action={saveAllocation} className="mt-4 grid gap-3 md:grid-cols-4">
+        <form action={saveAllocation} className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           <input type="hidden" name="weekStart" value={currentWeek} />
           <input type="hidden" name="projectId" value={project.id} />
-          <label className="block text-sm md:col-span-2">
+          <label className="block text-sm sm:col-span-2">
             <span className="text-slate-600">Человек</span>
             <select
               name="personId"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
               required
             >
               <option value="">Выберите</option>
@@ -230,7 +230,7 @@ export default async function ProjectDetailPage({
               max={100}
               name="percent"
               defaultValue={20}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2"
+              className="mt-1 w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2"
             />
           </label>
           <div className="flex items-end">
