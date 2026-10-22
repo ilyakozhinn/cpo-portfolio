@@ -25,7 +25,8 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "/";
 
-  if (pathname === "/login") {
+  // Public paths that don't require authentication
+  if (pathname === "/login" || pathname.startsWith("/slides")) {
     return (
       <html lang="ru" className={`${inter.variable} h-full`}>
         <body className="min-h-full font-sans antialiased">{children}</body>

@@ -306,6 +306,50 @@ function PropertiesPanel({
   );
 }
 
+function ExportDropdown({ onExport }: { onExport: (format: "pdf" | "pptx" | "json") => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-sm font-medium"
+      >
+        <Download size={16} />
+        Экспорт
+      </button>
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20">
+            <button
+              onClick={() => { onExport("pdf"); setIsOpen(false); }}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+            >
+              PDF
+            </button>
+            <button
+              onClick={() => { onExport("pptx"); setIsOpen(false); }}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+            >
+              PowerPoint
+            </button>
+            <button
+              onClick={() => { onExport("json"); setIsOpen(false); }}
+              className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+            >
+              JSON
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 interface SlidesEditorProps {
   onPresent: () => void;
   onExport: (format: "pdf" | "pptx" | "json") => void;
@@ -488,32 +532,7 @@ export function SlidesEditor({ onPresent, onExport }: SlidesEditorProps) {
               <Play size={16} />
               Показать
             </button>
-            <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-sm font-medium">
-                <Download size={16} />
-                Экспорт
-              </button>
-              <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-slate-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                <button
-                  onClick={() => onExport("pdf")}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
-                >
-                  PDF
-                </button>
-                <button
-                  onClick={() => onExport("pptx")}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
-                >
-                  PowerPoint
-                </button>
-                <button
-                  onClick={() => onExport("json")}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
-                >
-                  JSON
-                </button>
-              </div>
-            </div>
+            <ExportDropdown onExport={onExport} />
           </div>
         </div>
 
