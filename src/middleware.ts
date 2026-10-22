@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
 const SESSION_COOKIE = "cpo_session";
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/slides"];
 
 function getSecret() {
   return new TextEncoder().encode(
@@ -18,6 +18,8 @@ export async function middleware(request: NextRequest) {
 
   if (
     PUBLIC_PATHS.includes(pathname) ||
+    pathname.startsWith("/slides") ||
+    pathname.startsWith("/api/slides/") ||
     pathname.startsWith("/api/telegram/") ||
     pathname.startsWith("/_next") ||
     pathname.includes(".")
